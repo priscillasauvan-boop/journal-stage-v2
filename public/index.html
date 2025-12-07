@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Journal de Stage</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📔 Mon Journal de Stage</h1>
+      <p class="subtitle">Suivez vos stages et votre humeur au quotidien</p>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="stages">📚 Mes Stages</button>
+      <button class="tab" data-tab="journal">✏️ Journal</button>
+      <button class="tab" data-tab="evaluation">🫵 Auto-évaluation</button>
+      <button class="tab" data-tab="tuteur">🌱 Climat d'apprentissage</button>
+      <button class="tab" data-tab="stats">😉 Statistiques</button>
+    </nav>
+
+    <div id="stages-view" class="view active">
+      <div class="stages-header">
+        <div class="modality-selector">
+          <select id="modality-select">
+            <option value="">Modalité</option>
+            <option value="nucleaire">☢️ Médecine Nucléaire</option>
+            <option value="radiotherapie">💥 Radiothérapie</option>
+            <option value="scanner">🌀 Scanner</option>
+            <option value="irm">🧲 IRM</option>
+            <option value="conventionnelle">🩻 Conventionnelle</option>
+            <option value="interventionnelle">🫀 Interventionnelle</option>
+            <option value="echographie">🦇 Échographie</option>
+          </select>
+        </div>
+        <button class="btn-add-stage" onclick="openNewStageModal()">➕ Nouveau Stage</button>
+      </div>
+
+      <div id="stages-list" class="stages-grid"></div>
+    </div>
+
+    <div id="journal-view" class="view">
+      <div class="journal-header">
+        <h2>Ajouter une note</h2>
+        <div class="date-selector-wrapper">
+          <input type="date" id="selected-date" class="date-input">
+          <div class="date-display" id="date-display-text">{today}</div>
+        </div>
+      </div>
+      <div id="stage-auto-detect" class="stage-auto-detect" style="display: none;"></div>
+
+      <div class="mood-selector">
+        <p>Comment était ta journée ?</p>
+        <div class="mood-buttons">
+          <button class="mood-btn" data-mood="excellent">😊<span>Excellent</span></button>
+          <button class="mood-btn" data-mood="bien">🙂<span>Bien</span></button>
+          <button class="mood-btn" data-mood="moyen">😐<span>Moyen</span></button>
+          <button class="mood-btn" data-mood="difficile">😕<span>Difficile</span></button>
+          <button class="mood-btn" data-mood="penible">😞<span>Pénible</span></button>
+        </div>
+      </div>
+
+      <div class="stage-selector">
+        <label for="stage-select">Stage concerné :</label>
+        <select id="stage-select"></select>
+      </div>
+
+      <div class="note-editor">
+        <textarea id="note-content" placeholder="Qu'as-tu fait aujourd'hui ? Qu'as-tu appris ?" rows="8"></textarea>
+        <button id="save-note" class="btn-primary">💾 Enregistrer la note</button>
+      </div>
+
+      <div class="recent-notes">
+        <h3>📝 Notes récentes</h3>
+        <div id="notes-list"></div>
+      </div>
+    </div>
+
+    <div id="evaluation-view" class="view">
+      <h2>📊 Grille d'auto-évaluation</h2>
+      <p class="evaluation-subtitle">Évalue ton expérience de stage</p>
+      
+      <div class="evaluation-stage-selector">
+        <label for="eval-stage-select">Stage à évaluer :</label>
+        <select id="eval-stage-select"></select>
+      </div>
+
+      <div id="evaluation-form" class="evaluation-form">
+        <h3 class="eval-section-title">🌱 1. Savoir-être (comment tu te sens dans l'équipe)</h3>
+        
+        <div class="eval-criterion">
+          <h3>Ponctualité</h3>
+          <div class="eval-options">
+            <label class="eval-option">
+              <input type="radio" name="ponctualite" value="4">
+              <div class="eval-card">
+                <div class="eval-emoji">😁</div>
+                <div class="eval-label">Je suis toujours à l'heure</div>
+                <div class="eval-points">4 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="ponctualite" value="3">
+              <div class="eval-card">
+                <div class="eval-emoji">🙂</div>
+                <div class="eval-label">Presque toujours</div>
+                <div class="eval-points">3 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="ponctualite" value="2">
+              <div class="eval-card">
+                <div class="eval-emoji">😐</div>
+                <div class="eval-label">Parfois en retard</div>
+                <div class="eval-points">2 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="ponctualite" value="1">
+              <div class="eval-card">
+                <div class="eval-emoji">😕</div>
+                <div class="eval-label">Souvent en retard</div>
+                <div class="eval-points">1 pt</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="eval-criterion">
+          <h3>Communication</h3>
+          <div class="eval-options">
+            <label class="eval-option">
+              <input type="radio" name="communication" value="4">
+              <div class="eval-card">
+                <div class="eval-emoji">😁</div>
+                <div class="eval-label">Je parle clairement et j'écoute</div>
+                <div class="eval-points">4 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="communication" value="3">
+              <div class="eval-card">
+                <div class="eval-emoji">🙂</div>
+                <div class="eval-label">Je communique globalement bien</div>
+                <div class="eval-points">3 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="communication" value="2">
+              <div class="eval-card">
+                <div class="eval-emoji">😐</div>
+                <div class="eval-label">J'ai du mal à me faire comprendre</div>
+                <div class="eval-points">2 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="communication" value="1">
+              <div class="eval-card">
+                <div class="eval-emoji">😕</div>
+                <div class="eval-label">Je n'ose pas ou je bloque</div>
+                <div class="eval-points">1 pt</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="eval-criterion">
+          <h3>Esprit d'équipe</h3>
+          <div class="eval-options">
+            <label class="eval-option">
+              <input type="radio" name="esprit" value="4">
+              <div class="eval-card">
+                <div class="eval-emoji">😁</div>
+                <div class="eval-label">J'aide et je coopère</div>
+                <div class="eval-points">4 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="esprit" value="3">
+              <div class="eval-card">
+                <div class="eval-emoji">🙂</div>
+                <div class="eval-label">Je participe quand on me sollicite</div>
+                <div class="eval-points">3 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="esprit" value="2">
+              <div class="eval-card">
+                <div class="eval-emoji">😐</div>
+                <div class="eval-label">Je reste un peu en retrait</div>
+                <div class="eval-points">2 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="esprit" value="1">
+              <div class="eval-card">
+                <div class="eval-emoji">😕</div>
+                <div class="eval-label">Je préfère rester seul</div>
+                <div class="eval-points">1 pt</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="eval-criterion">
+          <h3>Confiance / Autonomie</h3>
+          <div class="eval-options">
+            <label class="eval-option">
+              <input type="radio" name="confiance" value="4">
+              <div class="eval-card">
+                <div class="eval-emoji">😁</div>
+                <div class="eval-label">Je prends des initiatives</div>
+                <div class="eval-points">4 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="confiance" value="3">
+              <div class="eval-card">
+                <div class="eval-emoji">🙂</div>
+                <div class="eval-label">J'essaie parfois</div>
+                <div class="eval-points">3 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="confiance" value="2">
+              <div class="eval-card">
+                <div class="eval-emoji">😐</div>
+                <div class="eval-label">J'attends souvent les consignes</div>
+                <div class="eval-points">2 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="confiance" value="1">
+              <div class="eval-card">
+                <div class="eval-emoji">😕</div>
+                <div class="eval-label">Je n'ose pas du tout</div>
+                <div class="eval-points">1 pt</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="eval-criterion">
+          <h3>Adaptabilité</h3>
+          <div class="eval-options">
+            <label class="eval-option">
+              <input type="radio" name="adaptabilite" value="4">
+              <div class="eval-card">
+                <div class="eval-emoji">😁</div>
+                <div class="eval-label">Je gère bien les imprévus</div>
+                <div class="eval-points">4 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="adaptabilite" value="3">
+              <div class="eval-card">
+                <div class="eval-emoji">🙂</div>
+                <div class="eval-label">Je m'adapte la plupart du temps</div>
+                <div class="eval-points">3 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="adaptabilite" value="2">
+              <div class="eval-card">
+                <div class="eval-emoji">😐</div>
+                <div class="eval-label">Je stresse facilement</div>
+                <div class="eval-points">2 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="adaptabilite" value="1">
+              <div class="eval-card">
+                <div class="eval-emoji">😕</div>
+                <div class="eval-label">Je bloque face aux changements</div>
+                <div class="eval-points">1 pt</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <h3 class="eval-section-title">💪 2. Savoir-faire (ce que tu sais faire dans le stage)</h3>
+
+        <div class="eval-criterion">
+          <h3>Application des protocoles</h3>
+          <div class="eval-options">
+            <label class="eval-option">
+              <input type="radio" name="protocoles" value="4">
+              <div class="eval-card">
+                <div class="eval-emoji">💪</div>
+                <div class="eval-label">Je les respecte toujours</div>
+                <div class="eval-points">4 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="protocoles" value="3">
+              <div class="eval-card">
+                <div class="eval-emoji">👍</div>
+                <div class="eval-label">Presque toujours</div>
+                <div class="eval-points">3 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="protocoles" value="2">
+              <div class="eval-card">
+                <div class="eval-emoji">🤔</div>
+                <div class="eval-label">J'oublie parfois</div>
+                <div class="eval-points">2 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="protocoles" value="1">
+              <div class="eval-card">
+                <div class="eval-emoji">😰</div>
+                <div class="eval-label">Je ne les applique pas bien</div>
+                <div class="eval-points">1 pt</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="eval-criterion">
+          <h3>Gestes techniques</h3>
+          <div class="eval-options">
+            <label class="eval-option">
+              <input type="radio" name="gestes" value="4">
+              <div class="eval-card">
+                <div class="eval-emoji">💪</div>
+                <div class="eval-label">Je suis sûr de moi</div>
+                <div class="eval-points">4 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="gestes" value="3">
+              <div class="eval-card">
+                <div class="eval-emoji">👍</div>
+                <div class="eval-label">Globalement correct</div>
+                <div class="eval-points">3 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="gestes" value="2">
+              <div class="eval-card">
+                <div class="eval-emoji">🤔</div>
+                <div class="eval-label">Pas toujours précis</div>
+                <div class="eval-points">2 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="gestes" value="1">
+              <div class="eval-card">
+                <div class="eval-emoji">😰</div>
+                <div class="eval-label">Je me trompe souvent</div>
+                <div class="eval-points">1 pt</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="eval-criterion">
+          <h3>Utilisation du matériel</h3>
+          <div class="eval-options">
+            <label class="eval-option">
+              <input type="radio" name="materiel" value="4">
+              <div class="eval-card">
+                <div class="eval-emoji">💪</div>
+                <div class="eval-label">Je suis à l'aise</div>
+                <div class="eval-points">4 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="materiel" value="3">
+              <div class="eval-card">
+                <div class="eval-emoji">👍</div>
+                <div class="eval-label">Ça va</div>
+                <div class="eval-points">3 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="materiel" value="2">
+              <div class="eval-card">
+                <div class="eval-emoji">🤔</div>
+                <div class="eval-label">Je fais des maladresses</div>
+                <div class="eval-points">2 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="materiel" value="1">
+              <div class="eval-card">
+                <div class="eval-emoji">😰</div>
+                <div class="eval-label">Je ne sais pas bien l'utiliser</div>
+                <div class="eval-points">1 pt</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="eval-criterion">
+          <h3>Organisation</h3>
+          <div class="eval-options">
+            <label class="eval-option">
+              <input type="radio" name="organisation" value="4">
+              <div class="eval-card">
+                <div class="eval-emoji">💪</div>
+                <div class="eval-label">Je planifie bien</div>
+                <div class="eval-points">4 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="organisation" value="3">
+              <div class="eval-card">
+                <div class="eval-emoji">👍</div>
+                <div class="eval-label">Je m'organise globalement</div>
+                <div class="eval-points">3 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="organisation" value="2">
+              <div class="eval-card">
+                <div class="eval-emoji">🤔</div>
+                <div class="eval-label">Je m'éparpille parfois</div>
+                <div class="eval-points">2 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="organisation" value="1">
+              <div class="eval-card">
+                <div class="eval-emoji">😰</div>
+                <div class="eval-label">Je suis désorganisé</div>
+                <div class="eval-points">1 pt</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="eval-criterion">
+          <h3>Relation patient</h3>
+          <div class="eval-options">
+            <label class="eval-option">
+              <input type="radio" name="patient" value="4">
+              <div class="eval-card">
+                <div class="eval-emoji">💪</div>
+                <div class="eval-label">Je mets à l'aise et j'explique</div>
+                <div class="eval-points">4 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="patient" value="3">
+              <div class="eval-card">
+                <div class="eval-emoji">👍</div>
+                <div class="eval-label">Je suis correct</div>
+                <div class="eval-points">3 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="patient" value="2">
+              <div class="eval-card">
+                <div class="eval-emoji">🤔</div>
+                <div class="eval-label">Je suis un peu maladroit</div>
+                <div class="eval-points">2 pts</div>
+              </div>
+            </label>
+            <label class="eval-option">
+              <input type="radio" name="patient" value="1">
+              <div class="eval-card">
+                <div class="eval-emoji">😰</div>
+                <div class="eval-label">Je ne sais pas comment faire</div>
+                <div class="eval-points">1 pt</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div id="eval-score-display" class="eval-score-display" style="display: none;">
+          <div class="eval-score-value">0/40</div>
+          <div class="eval-score-label">Score total</div>
+          <div id="eval-score-interpretation" class="eval-score-interpretation"></div>
+        </div>
+
+        <button id="save-evaluation" class="btn-primary">💾 Enregistrer l'auto-évaluation</button>
+      </div>
+
+      <div class="score-interpretation-guide">
+        <h3>🎯 Interprétation du score</h3>
+        <div class="interpretation-item">
+          <div class="interpretation-range">40-48 pts</div>
+          <div class="interpretation-text">🌟 Tu es très solide, continue à cultiver tes forces.</div>
+        </div>
+        <div class="interpretation-item">
+          <div class="interpretation-range">30-39 pts</div>
+          <div class="interpretation-text">👍 Bon niveau, quelques points à travailler pour progresser.</div>
+        </div>
+        <div class="interpretation-item">
+          <div class="interpretation-range">20-29 pts</div>
+          <div class="interpretation-text">⚖️ Tu avances, mais il y a des axes clairs à améliorer.</div>
+        </div>
+        <div class="interpretation-item">
+          <div class="interpretation-range">&lt;20 pts</div>
+          <div class="interpretation-text">🚀 C'est une base de départ, concentre-toi sur 2-3 critères prioritaires.</div>
+        </div>
+      </div>
+
+      <div id="evaluations-history" class="evaluations-history">
+        <h3>📋 Historique des auto-évaluations</h3>
+        <div id="evaluations-list"></div>
+      </div>
+    </div>
+
+    <div id="tuteur-view" class="view">
+      <h2>💬 Évaluation du climat d'apprentissage</h2>
+      <p class="tuteur-intro">Chaque critère vaut 1 point si tu te reconnais dans l'affirmation (total sur 10)</p>
+
+      <div class="evaluation-tuteur-stagiaire-form">
+        <div class="evaluation-tuteur-selector">
+          <label for="eval-tuteur-stage-select">Choisis une modalité :</label>
+          <select id="eval-tuteur-stage-select"></select>
+        </div>
+
+        <div class="climat-grid">
+          <div class="climat-groupe" data-color="yellow">
+            <h3>Accueil et cadre du stage</h3>
+            <div class="climat-criteres">
+              <label class="climat-criterion">
+                <input type="checkbox" name="crit1" value="1">
+                <span>Je me suis senti·e accueilli·e avec attention et respect</span>
+              </label>
+              <label class="climat-criterion">
+                <input type="checkbox" name="crit2" value="1">
+                <span>Mon rôle a été clairement expliqué dès le début</span>
+              </label>
+              <label class="climat-criterion">
+                <input type="checkbox" name="crit3" value="1">
+                <span>J'ai pu poser des questions librement et obtenir des réponses</span>
+              </label>
+              <label class="climat-criterion">
+                <input type="checkbox" name="crit4" value="1">
+                <span>Le tuteur m'a encouragé·e à progresser à mon rythme</span>
+              </label>
+              <label class="climat-criterion">
+                <input type="checkbox" name="crit5" value="1">
+                <span>J'ai reçu des retours constructifs sur mes gestes et postures</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="climat-groupe" data-color="green">
+            <h3>Intégration et accompagnement</h3>
+            <div class="climat-criteres">
+              <label class="climat-criterion">
+                <input type="checkbox" name="crit6" value="1">
+                <span>Je me suis senti·e intégré·e dans l'équipe et les échanges</span>
+              </label>
+              <label class="climat-criterion">
+                <input type="checkbox" name="crit7" value="1">
+                <span>Le tuteur a adapté son accompagnement à mon profil (initial/reconversion)</span>
+              </label>
+              <label class="climat-criterion">
+                <input type="checkbox" name="crit8" value="1">
+                <span>Des outils ou repères m'ont été proposés pour m'aider (fiche, portfolio…)</span>
+              </label>
+              <label class="climat-criterion">
+                <input type="checkbox" name="crit9" value="1">
+                <span>Le tuteur a valorisé mes réussites et mes efforts</span>
+              </label>
+              <label class="climat-criterion">
+                <input type="checkbox" name="crit10" value="1">
+                <span>Je me suis senti·e soutenu·e dans ma construction professionnelle</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div id="eval-tuteur-stagiaire-score" class="climat-big-score-container" style="display: none;" data-profil="">
+          <div class="climat-big-score">
+            <div class="climat-score-number">0/10</div>
+          </div>
+          <div class="climat-result-card">
+            <div class="climat-result-badge"></div>
+            <div class="climat-result-content">
+              <div class="climat-result-name"></div>
+              <div class="climat-result-desc"></div>
+            </div>
+          </div>
+        </div>
+
+        <button id="save-eval-tuteur-stagiaire" class="btn-climat">💾 Enregistrer l'évaluation</button>
+      </div>
+
+      <div id="eval-tuteur-history" class="evaluations-history">
+        <h3>📋 Historique des évaluations climat</h3>
+        <div id="eval-tuteur-list"></div>
+      </div>
+
+      <div class="climat-interpretation-guide">
+        <h3>🎯 Lecture des Scores</h3>
+        
+        <div class="climat-profil-item" data-profil="exemplaire">
+          <div class="climat-profil-badge"></div>
+          <div class="climat-profil-content">
+            <div class="climat-profil-range">9-10 points</div>
+            <div class="climat-profil-name">Climat exemplaire</div>
+            <div class="climat-profil-desc">Accompagnement idéal, sentiment d'intégration fort</div>
+          </div>
+        </div>
+
+        <div class="climat-profil-item" data-profil="favorable">
+          <div class="climat-profil-badge"></div>
+          <div class="climat-profil-content">
+            <div class="climat-profil-range">7-8 points</div>
+            <div class="climat-profil-name">Climat favorable</div>
+            <div class="climat-profil-desc">Accompagnement solide et bienveillant</div>
+          </div>
+        </div>
+
+        <div class="climat-profil-item" data-profil="mitige">
+          <div class="climat-profil-badge"></div>
+          <div class="climat-profil-content">
+            <div class="climat-profil-range">4-6 points</div>
+            <div class="climat-profil-name">Climat mitigé</div>
+            <div class="climat-profil-desc">Accompagnement présent mais perfectible</div>
+          </div>
+        </div>
+
+        <div class="climat-profil-item" data-profil="difficile">
+          <div class="climat-profil-badge"></div>
+          <div class="climat-profil-content">
+            <div class="climat-profil-range">0-3 points</div>
+            <div class="climat-profil-name">Climat difficile</div>
+            <div class="climat-profil-desc">Accompagnement à renforcer, pistes d'amélioration</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION AUTO-ÉVALUATION TUTEUR - TEMPORAIREMENT MASQUÉE (à remettre ailleurs demain) -->
+      <!--
+      <hr style="margin: 3rem 0; border: 1px solid var(--gray-200);">
+
+      <h2>👨‍🏫 Grille d'Auto-Évaluation du Tuteur</h2>
+      <p class="tuteur-intro">Évaluez votre accompagnement du stagiaire sur 7 axes clés</p>
+
+      <div class="tuteur-grid">
+        <div class="tuteur-axe" data-color="blue">
+          <h3>🔵 Axe 1 : Accueil et intégration</h3>
+          <div class="tuteur-questions">
+            <label class="tuteur-question">
+              <input type="checkbox" name="q1" data-axe="1">
+              <span>Ai-je accueilli le stagiaire avec bienveillance ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q2" data-axe="1">
+              <span>Ai-je présenté l'équipe et les règles du service ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q3" data-axe="1">
+              <span>Ai-je clarifié son rôle dès le début ?</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="tuteur-axe" data-color="green">
+          <h3>🟢 Axe 2 : Communication et feedback</h3>
+          <div class="tuteur-questions">
+            <label class="tuteur-question">
+              <input type="checkbox" name="q4" data-axe="2">
+              <span>Ai-je donné des consignes claires ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q5" data-axe="2">
+              <span>Ai-je fourni un retour immédiat et constructif ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q6" data-axe="2">
+              <span>Ai-je encouragé les questions ?</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="tuteur-axe" data-color="yellow">
+          <h3>🟡 Axe 3 : Posture relationnelle</h3>
+          <div class="tuteur-questions">
+            <label class="tuteur-question">
+              <input type="checkbox" name="q7" data-axe="3">
+              <span>Ai-je créé un climat sécurisant où l'erreur est permise ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q8" data-axe="3">
+              <span>Ai-je fait preuve de patience et d'écoute active ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q9" data-axe="3">
+              <span>Ai-je valorisé ses réussites ?</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="tuteur-axe" data-color="purple">
+          <h3>🟣 Axe 4 : Influence tacite</h3>
+          <div class="tuteur-questions">
+            <label class="tuteur-question">
+              <input type="checkbox" name="q10" data-axe="4">
+              <span>Ai-je conscience que mes attitudes influencent le stagiaire ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q11" data-axe="4">
+              <span>Ai-je transmis une posture respectueuse du patient ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q12" data-axe="4">
+              <span>Ai-je réfléchi à l'impact de mes gestes/paroles ?</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="tuteur-axe" data-color="blue">
+          <h3>🔵 Axe 5 : Adaptation au profil</h3>
+          <div class="tuteur-questions">
+            <label class="tuteur-question">
+              <input type="checkbox" name="q13" data-axe="5">
+              <span>Ai-je identifié si le stagiaire est en formation initiale ou reconversion ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q14" data-axe="5">
+              <span>Ai-je adapté mon accompagnement à son profil ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q15" data-axe="5">
+              <span>Ai-je respecté son rythme d'apprentissage ?</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="tuteur-axe" data-color="green">
+          <h3>🟢 Axe 6 : Soutien et ressources</h3>
+          <div class="tuteur-questions">
+            <label class="tuteur-question">
+              <input type="checkbox" name="q16" data-axe="6">
+              <span>Ai-je proposé des outils (fiche réflexive, portfolio) ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q17" data-axe="6">
+              <span>Ai-je orienté vers un espace de soutien si nécessaire ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q18" data-axe="6">
+              <span>Ai-je contribué à sa construction identitaire ?</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="tuteur-axe" data-color="yellow">
+          <h3>🟡 Axe 7 : Réflexivité du tuteur</h3>
+          <div class="tuteur-questions">
+            <label class="tuteur-question">
+              <input type="checkbox" name="q19" data-axe="7">
+              <span>Ai-je pris du recul sur ma pratique ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q20" data-axe="7">
+              <span>Ai-je cherché à améliorer mes compétences pédagogiques ?</span>
+            </label>
+            <label class="tuteur-question">
+              <input type="checkbox" name="q21" data-axe="7">
+              <span>Ai-je considéré le tutorat comme une responsabilité éthique ?</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="tuteur-score-display" class="tuteur-score-display">
+        <div class="tuteur-score-value">0/21</div>
+        <div id="tuteur-profil" class="tuteur-profil"></div>
+      </div>
+
+      <div class="tuteur-profils-guide">
+        <h3>🎯 Lecture des Scores</h3>
+        <div class="profil-item" data-profil="structurant">
+          <div class="profil-badge green">🟢</div>
+          <div class="profil-details">
+            <div class="profil-range">19-21 points</div>
+            <div class="profil-name">Tuteur structurant</div>
+            <div class="profil-desc">Modèle à valoriser</div>
+          </div>
+        </div>
+        <div class="profil-item" data-profil="technique">
+          <div class="profil-badge blue">🔵</div>
+          <div class="profil-details">
+            <div class="profil-range">13-18 points</div>
+            <div class="profil-name">Tuteur technique</div>
+            <div class="profil-desc">Bon sur le geste, à enrichir sur la posture</div>
+          </div>
+        </div>
+        <div class="profil-item" data-profil="distant">
+          <div class="profil-badge orange">🟠</div>
+          <div class="profil-details">
+            <div class="profil-range">7-12 points</div>
+            <div class="profil-name">Tuteur distant</div>
+            <div class="profil-desc">Présent mais peu impliqué relationnellement</div>
+          </div>
+        </div>
+        <div class="profil-item" data-profil="deficient">
+          <div class="profil-badge red">🔴</div>
+          <div class="profil-details">
+            <div class="profil-range">0-6 points</div>
+            <div class="profil-name">Tuteur déficient</div>
+            <div class="profil-desc">Risque de freiner l'apprentissage</div>
+          </div>
+        </div>
+      </div>
+      -->
+      <!-- FIN SECTION AUTO-ÉVALUATION TUTEUR -->
+    </div>
+
+    <div id="stats-view" class="view">
+      <h2>😉 Statistiques de l'humeur en stage</h2>
+      <div id="stats-container"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
